@@ -13,7 +13,13 @@ namespace Disco
         POST
     }
 
-    public class HttpService : IDisposable
+    public interface IHttpService : IDisposable
+    {
+        Task<TReturn> GetAsync<TReturn>(string endpoint);
+        void PostAsync(string endpoint, object content);
+    }
+
+    public class HttpService : IHttpService
     {
         public static string BaseUrl = "https://discordapp.com/api/";
 

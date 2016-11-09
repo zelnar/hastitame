@@ -5,7 +5,18 @@ using System.Linq;
 
 namespace Disco
 {
-    public class Discord
+    public interface IDiscordService
+    {
+        string GenerateAddBotUrl();
+        Task<GuildChannel> GetChannelById(string channelId);
+        Task<GuildChannel> GetChannelByName(string channelName);
+        Task<List<Message>> GetMessagesForChannelById(string channelId);
+        Task<List<Message>> GetMessagesForChannelByName(string channelName);
+        Task<List<GuildChannel>> ListChannelsAsync();
+        void PostMessage(string channelId, string message);
+    }
+
+    public class Discord : IDiscordService
     {
         public static string GuildId;
         public static string ClientId { get; set; }
@@ -30,7 +41,7 @@ namespace Disco
         /// <returns>List of GuildChannel</returns>
         public async Task<List<GuildChannel>> ListChannelsAsync()
         {
-            using (HttpService service = new HttpService())
+            using (IHttpService service = new HttpService())
             {
                 return await service.GetAsync<List<GuildChannel>>($"guilds/{GuildId}/channels");
             }
@@ -46,7 +57,7 @@ namespace Disco
             var channels = await ListChannelsAsync();
             var theChannel = channels.SingleOrDefault(c => c.Name == channelName);
 
-            using (HttpService service = new HttpService())
+            using (IHttpService service = new HttpService())
             {
                 return await service.GetAsync<GuildChannel>($"channels/{theChannel.Id}");
             }
@@ -62,7 +73,7 @@ namespace Disco
             var channels = await ListChannelsAsync();
             var theChannel = channels.SingleOrDefault(c => c.Id == channelId);
 
-            using (HttpService service = new HttpService())
+            using (IHttpService service = new HttpService())
             {
                 return await service.GetAsync<GuildChannel>($"channels/{theChannel.Id}");
             }
@@ -75,7 +86,7 @@ namespace Disco
         /// <returns>List of messages in channel</returns>
         public async Task<List<Message>> GetMessagesForChannelById(string channelId)
         {
-            using (HttpService service = new HttpService())
+            using (IHttpService service = new HttpService())
             {
                 return await service.GetAsync<List<Message>>($"channels/{channelId}/messages");
             }
@@ -92,7 +103,7 @@ namespace Disco
 
             var theChannel = channels.SingleOrDefault(c => c.Name == channelName);
 
-            using (HttpService service = new HttpService())
+            using (IHttpService service = new HttpService())
             {
                 return await service.GetAsync<List<Message>>($"channels/{theChannel.Id}/messages");
             }
@@ -108,7 +119,7 @@ namespace Disco
         {
             var msg = new { content = message };
 
-            using (HttpService service = new HttpService())
+            using (IHttpService service = new HttpService())
             {
                 service.PostAsync($"channels/{channelId}/messages", msg);
             }
@@ -120,7 +131,7 @@ namespace Disco
         /// <returns></returns>
         public string GenerateAddBotUrl()
         {
-            return HttpService.BaseUrl + $"oauth2/authorize?client_id={ClientId}&scope=bot&permissions=0";
+            return $"https://discordapp.com/api/oauth2/authorize?client_id={ClientId}&scope=bot&permissions=0";
         }
     }
 }
