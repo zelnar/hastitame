@@ -4,3 +4,5 @@
 
 /.vs
 /Disco/Properties
+/Disco/bin/Debug
+/Disco/obj/Debug/netstandard1.6

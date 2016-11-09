@@ -15,14 +15,11 @@ namespace Disco
 
     public class HttpService : IDisposable
     {
-        private readonly string _baseUrl = "https://discordapp.com/api/";
-        private string _clientId;
-        private AuthenticationHeaderValue _authHeader;
+        public static string BaseUrl = "https://discordapp.com/api/";
 
         public HttpService()
         {
-            _authHeader = new AuthenticationHeaderValue("Bot", Discord.BotToken);
-            _clientId = Discord.ClientId;
+
         }
 
         public async Task<T> GetAsync<T>(string action)
@@ -46,17 +43,12 @@ namespace Disco
             await Request(HTTPMethod.POST, action, json);
         }
 
-        public string GenerateAddBotUrl()
-        {
-            return _baseUrl + $"oauth2/authorize?client_id={_clientId}&scope=bot&permissions=0";
-        }
-
         private async Task<string> Request(HTTPMethod method, string action, string content = null)
         {
             using (HttpClient client = new HttpClient())
             {
-                client.BaseAddress = new Uri(_baseUrl);
-                client.DefaultRequestHeaders.Authorization = _authHeader;
+                client.BaseAddress = new Uri(BaseUrl);
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bot", Discord.BotToken);
 
                 HttpResponseMessage response = null;
 

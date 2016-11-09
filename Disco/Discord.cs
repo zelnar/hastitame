@@ -5,20 +5,19 @@ using System.Linq;
 
 namespace Disco
 {
-    public static class Discord
+    public class Discord
     {
-        public static string GuildId { get; set; }
+        public static string GuildId;
         public static string ClientId { get; set; }
         public static string BotToken { get; set; }
-
 
         /// <summary>
         /// Configures Discord
         /// </summary>
-        /// <param name="guildId">The discord serverId</param>
-        /// <param name="clientId">The clientId of your application</param>
-        /// <param name="botToken">The bot authorization token</param>
-        public static void Configure(string guildId, string clientId, string botToken)
+        /// <param name="guildId">Discord server (guild) Id</param>
+        /// <param name="clientId">App client Id</param>
+        /// <param name="botToken">Bot auth token</param>
+        public Discord(string guildId, string clientId, string botToken)
         {
             GuildId = guildId;
             ClientId = clientId;
@@ -29,7 +28,7 @@ namespace Disco
         /// Gets all the discord channels on the server
         /// </summary>
         /// <returns>List of GuildChannel</returns>
-        public static async Task<List<GuildChannel>> ListChannelsAsync()
+        public async Task<List<GuildChannel>> ListChannelsAsync()
         {
             using (HttpService service = new HttpService())
             {
@@ -42,7 +41,7 @@ namespace Disco
         /// </summary>
         /// <param name="channelName"></param>
         /// <returns></returns>
-        public static async Task<GuildChannel> GetChannelByName(string channelName)
+        public async Task<GuildChannel> GetChannelByName(string channelName)
         {
             var channels = await ListChannelsAsync();
             var theChannel = channels.SingleOrDefault(c => c.Name == channelName);
@@ -58,7 +57,7 @@ namespace Disco
         /// </summary>
         /// <param name="channelId"></param>
         /// <returns></returns>
-        public static async Task<GuildChannel> GetChannelById(string channelId)
+        public async Task<GuildChannel> GetChannelById(string channelId)
         {
             var channels = await ListChannelsAsync();
             var theChannel = channels.SingleOrDefault(c => c.Id == channelId);
@@ -74,7 +73,7 @@ namespace Disco
         /// </summary>
         /// <param name="channelId">The Id of the Channel</param>
         /// <returns>List of messages in channel</returns>
-        public static async Task<List<Message>> GetMessagesForChannelById(string channelId)
+        public async Task<List<Message>> GetMessagesForChannelById(string channelId)
         {
             using (HttpService service = new HttpService())
             {
@@ -87,7 +86,7 @@ namespace Disco
         /// </summary>
         /// <param name="channelName">Friendly channel name</param>
         /// <returns>List of messages in channel</returns>
-        public static async Task<List<Message>> GetMessagesForChannelByName(string channelName)
+        public async Task<List<Message>> GetMessagesForChannelByName(string channelName)
         {
             var channels = await ListChannelsAsync();
 
@@ -105,7 +104,7 @@ namespace Disco
         /// </summary>
         /// <param name="channelId"></param>
         /// <param name="message"></param>
-        public static void PostMessage(string channelId, string message)
+        public void PostMessage(string channelId, string message)
         {
             var msg = new { content = message };
 
@@ -113,6 +112,15 @@ namespace Disco
             {
                 service.PostAsync($"channels/{channelId}/messages", msg);
             }
+        }
+
+        /// <summary>
+        /// Generates the URL needed to authorize your bot for the first time.
+        /// </summary>
+        /// <returns></returns>
+        public string GenerateAddBotUrl()
+        {
+            return HttpService.BaseUrl + $"oauth2/authorize?client_id={ClientId}&scope=bot&permissions=0";
         }
     }
 }
