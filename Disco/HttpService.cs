@@ -22,28 +22,40 @@ namespace Disco
 
         }
 
-        public async Task<T> GetAsync<T>(string action)
+        /// <summary>
+        /// Performs an Async GET request
+        /// </summary>
+        /// <typeparam name="TReturn">Return Object</typeparam>
+        /// <param name="endpoint">API Endpoint eg; /do/something</param>
+        /// <returns>Request object type</returns>
+        public async Task<TReturn> GetAsync<TReturn>(string endpoint)
         {
-            var responseString = await Request(HTTPMethod.GET, action);
+            var responseString = await Request(HTTPMethod.GET, endpoint);
             var responseObject = await Task.Run(() =>
             {
-                return JsonConvert.DeserializeObject<T>(responseString);
+                return JsonConvert.DeserializeObject<TReturn>(responseString);
             });
 
             return responseObject;
         }
 
-        public async void PostAsync<T>(string action, T content)
+        /// <summary>
+        /// Performs a POST request
+        /// </summary>
+        /// <param name="endpoint">API Endpoint eg; /do/something</param>
+        /// <param name="content">Object to POST</param>
+        public async void PostAsync(string endpoint, object content)
         {
             var json = await Task.Run(() =>
             {
                 return JsonConvert.SerializeObject(content);
             });
 
-            await Request(HTTPMethod.POST, action, json);
+            await Request(HTTPMethod.POST, endpoint, json);
         }
 
-        private async Task<string> Request(HTTPMethod method, string action, string content = null)
+        // Worker class performs HTTP Requests
+        private async Task<string> Request(HTTPMethod method, string endpoint, string content = null)
         {
             using (HttpClient client = new HttpClient())
             {
@@ -55,10 +67,10 @@ namespace Disco
                 switch (method)
                 {
                     case HTTPMethod.GET:
-                        response = await client.GetAsync(action);
+                        response = await client.GetAsync(endpoint);
                         break;
                     case HTTPMethod.POST:
-                        response = await client.PostAsync(action, new StringContent(content, Encoding.UTF8, "application/json"));
+                        response = await client.PostAsync(endpoint, new StringContent(content, Encoding.UTF8, "application/json"));
                         break;
                 }
 
